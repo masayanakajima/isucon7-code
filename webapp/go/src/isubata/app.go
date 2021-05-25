@@ -442,7 +442,7 @@ func fetchUnread(c echo.Context) error {
 		return c.NoContent(http.StatusForbidden)
 	}
 
-	//time.Sleep(time.Second)
+	time.Sleep(time.Second)
 
 	resp := []map[string]interface{}{}
 	rows, err := db.Query("select channel_id, count(*) from (select channel_id from message where ? < id ) group by channel_id",)
