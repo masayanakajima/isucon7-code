@@ -442,10 +442,10 @@ func fetchUnread(c echo.Context) error {
 		return c.NoContent(http.StatusForbidden)
 	}
 
-	time.Sleep(time.Second)
+	//time.Sleep(time.Second)
 
 	resp := []map[string]interface{}{}
-	rows, err := db.Query("select channel_id, count(*) from (select channel_id from message where ? < id ) group by channel_id",)
+	rows, err := db.Query("select channel_id, count(*) from (select * from (select msg.id as id, msg.channel_id as channel_id, tmp1.message_id as last_id from message as msg join (select channel_id, message_id from haveread as hr where user_id = ?) as tmp1 on msg.id = tmp1.channel_id) as tmp2 where id > last_id) as tmp3 group by channel_id", userID)
 	if err != nil {
 		return err
 	}
