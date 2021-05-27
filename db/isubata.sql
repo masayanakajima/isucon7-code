@@ -21,7 +21,6 @@ CREATE TABLE channel (
   updated_at DATETIME NOT NULL,
   created_at DATETIME NOT NULL
 ) Engine=InnoDB DEFAULT CHARSET=utf8mb4;
-alter table message add index channel_id_idx(channel_id,id);
 
 CREATE TABLE message (
   id BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
@@ -39,3 +38,5 @@ CREATE TABLE haveread (
   created_at DATETIME NOT NULL,
   PRIMARY KEY(user_id, channel_id)
 ) Engine=InnoDB DEFAULT CHARSET=utf8mb4;
+
+alter table message add index channel_id_idx(channel_id,id);
