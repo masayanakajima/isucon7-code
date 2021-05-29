@@ -407,6 +407,7 @@ func getMessage(c echo.Context) error {
 	}
 
 	response := make([]map[string]interface{}, 0)
+	var message_id int64
 	for rows.Next() {
 		u := User{}
 		var id int64
@@ -420,7 +421,7 @@ func getMessage(c echo.Context) error {
 		r["user"] = u
 		r["content"] = content
 		r["date"] = date.Format("2006/01/02 15:04:05")
-
+		message_id = id
 		response = append(response, r)
 	}
 
@@ -431,7 +432,7 @@ func getMessage(c echo.Context) error {
 		_, err := db.Exec("INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at)"+
 			" VALUES (?, ?, ?, NOW(), NOW())"+
 			" ON DUPLICATE KEY UPDATE message_id = ?, updated_at = NOW()",
-			userID, chanID, response[length-1]["id"], response[length-1]["id"])
+			userID, chanID, message_id, message_id)
 		if err != nil {
 			return err
 		}
