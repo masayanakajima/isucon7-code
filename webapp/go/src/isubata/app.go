@@ -428,7 +428,6 @@ func getMessage(c echo.Context) error {
 
 
 	if len(response) > 0 {
-		length := len(response)
 		_, err := db.Exec("INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at)"+
 			" VALUES (?, ?, ?, NOW(), NOW())"+
 			" ON DUPLICATE KEY UPDATE message_id = ?, updated_at = NOW()",
