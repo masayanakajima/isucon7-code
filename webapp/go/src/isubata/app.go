@@ -401,7 +401,7 @@ func getMessage(c echo.Context) error {
 	//	response = append(response, r)
 	//}
 
-	rows, err := db.Query("select m.id, u.name, u.display_name, u.avatar_icon, m.created_at, m.content from (select id, user_id, created_at, content where channel_id = ? and id > ? order by id asc limit 100) as m join user as u on m.user_id = u.id", chanID, lastID)
+	rows, err := db.Query("select m.id, u.name, u.display_name, u.avatar_icon, m.created_at, m.content from (select id, user_id, created_at, content from message where channel_id = ? and id > ? order by id asc limit 100) as m join user as u on m.user_id = u.id", chanID, lastID)
 	if err != nil {
 		return err
 	}
