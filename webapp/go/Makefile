@@ -2,7 +2,7 @@ GOPATH := ${PWD}
 export GOPATH
 
 build:
-	go build -v /home/isucon/isubata/webapp/go/isubata
+	go build -v isubata
 
 vet:
 	go vet ./src/isubata/...
