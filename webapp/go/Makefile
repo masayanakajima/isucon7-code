@@ -2,6 +2,7 @@ GOPATH := ${PWD}
 export GOPATH
 
 build:
+    go mod init
 	go build -v ./src/isubata/app.go
 
 vet:
