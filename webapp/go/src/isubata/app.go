@@ -124,8 +124,13 @@ type Message struct {
 
 func queryMessages(chanID, lastID int64) ([]Message, error) {
 	msgs := []Message{}
-	err := db.Select(&msgs, "SELECT * FROM message WHERE id > ? AND channel_id = ? ORDER BY id DESC LIMIT 100",
-		lastID, chanID)
+
+	//if lastID == 0 {
+	//	err := db.SELECT(&msgs, "SELECT * FROM message where channel_id = ? ORDER BY id DESC LIMIT 100", chanID)
+	//} else {
+		err := db.Select(&msgs, "SELECT * FROM message WHERE id > ? AND channel_id = ? ORDER BY id DESC LIMIT 100",
+			lastID, chanID)
+	//}
 	return msgs, err
 }
 
@@ -381,20 +386,40 @@ func getMessage(c echo.Context) error {
 		return err
 	}
 
-	messages, err := queryMessages(chanID, lastID)
+	//messages, err := queryMessages(chanID, lastID)
+	//if err != nil {
+	//	return err
+	//}
+
+	//response := make([]map[string]interface{}, 0)
+	//for i := len(messages) - 1; i >= 0; i-- {
+	//	m := messages[i]
+	//	r, err := jsonifyMessage(m)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	response = append(response, r)
+	//}
+
+	rows, err := db.Query("select m.id, u.name, u.display_name, u.avatar_icon, m.created_at, m.content from message as m join user as u on m.user_id = u.id where m.id > ? and m.channel_id = ?"
+				, lastID, chanID)
 	if err != nil {
 		return err
 	}
 
-	response := make([]map[string]interface{}, 0)
-	for i := len(messages) - 1; i >= 0; i-- {
-		m := messages[i]
-		r, err := jsonifyMessage(m)
-		if err != nil {
+	for rows.Next() {
+		u := User{}
+		r := make(map[string]interface{})
+		if err := rows.Scan(&r["id"], &u.Name, &u.DisplayName, &u.AvatarIcon, &r["date"], &r["content"]); err != nil {
 			return err
 		}
+		r["user"] = u
+		r["date"] = r["date"].Format("2006/01/02 15:04:05")
+
 		response = append(response, r)
 	}
+
+
 
 	if len(messages) > 0 {
 		_, err := db.Exec("INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at)"+
