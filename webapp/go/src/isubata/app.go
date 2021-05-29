@@ -409,7 +409,7 @@ func getMessage(c echo.Context) error {
 	for rows.Next() {
 		u := User{}
 		var id int64
-		var date time.time
+		var date time.Time
 		var content string
 		if err := rows.Scan(&id, &u.Name, &u.DisplayName, &u.AvatarIcon, &date, &content); err != nil {
 			return err
