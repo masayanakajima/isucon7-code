@@ -235,6 +235,12 @@ type ChannelInfo struct {
 	CreatedAt   time.Time `db:"created_at"`
 }
 
+type Image struct {
+	ID   int64  `db:"id"`
+	Name string `db:"name"`
+	Data []Byte `db:"data"`
+}
+
 func getChannel(c echo.Context) error {
 	user, err := ensureLogin(c)
 	if user == nil {
@@ -711,6 +717,7 @@ func postProfile(c echo.Context) error {
 			return err
 		}
 		io.Copy(f, src)
+		defer src.Close()
 		defer f.Close()
 		_, err = db.Exec("UPDATE user SET avatar_icon = ? WHERE id = ?", avatarName, self.ID)
 		if err != nil {
@@ -771,6 +778,52 @@ func tRange(a, b int64) []int64 {
 	return r
 }
 
+func moveImages() {
+	images := []Image{}
+	err = db.Select(&image, "SELECT * FROM image")
+	if err != nil {
+		return err
+	}
+
+	for i, image := range images {
+		dotPos := strings.LastIndexByte(image.Name, '.')
+		if dotPos < 0 {
+			return ErrBadReqeust
+		}
+		ext := image.Name[dotPos:]
+		switch ext {
+		case ".jpg", ".jpeg", ".png", ".gif":
+			break
+		default:
+			return ErrBadReqeust
+		}
+
+		//file, err := fh.Open()
+		//if err != nil {
+		//	return err
+		//}
+		//avatarData, _ = ioutil.ReadAll(file)
+		//file.Close()
+
+		//if len(avatarData) > avatarMaxBytes {
+		//	return ErrBadReqeust
+		//}
+
+		//avatarName = fmt.Sprintf("%x%s", sha1.Sum(avatarData), ext)
+		f, err := os.Create("/tmp/" + image.Name)
+		if err != nil {
+			return err
+		}
+		//src, err := fh.Open()
+		//if err != nil {
+		//	return err
+		//}
+		f.Write(image.Data)
+		defer f.Close()
+	}
+	return c.Redirect(http.StatusSeeOther, "/")
+}
+
 func main() {
 	e := echo.New()
 	funcs := template.FuncMap{
@@ -806,6 +859,7 @@ func main() {
 	e.GET("add_channel", getAddChannel)
 	e.POST("add_channel", postAddChannel)
 	e.GET("/icons/:file_name", getIcon)
+	e.GET("/move_images", moveImages)
 
 	e.Start(":5000")
 }
