@@ -435,6 +435,11 @@ func getMessage(c echo.Context) error {
 		}
 	}
 
+	log.Println("getMessage")
+	log.Println(userID)
+	log.Println(response)
+	log.Println(message_id)
+
 	return c.JSON(http.StatusOK, response)
 }
 
@@ -490,6 +495,10 @@ func fetchUnread(c echo.Context) error {
 			"unread":     cnt}
 		resp = append(resp, r)
 	}
+
+	log.Println("fetchUnread")
+	log.Println(userID)
+	log.Println(resp)
 
 	return c.JSON(http.StatusOK, resp)
 }
