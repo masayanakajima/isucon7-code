@@ -425,7 +425,7 @@ func getMessage(c echo.Context) error {
 
 	rev_response := make([]map[string]interface{}, 0)
 	for i := len(response) - 1; i >= 0; i-- {
-		rev_response = append(rev_response, reponse[i])
+		rev_response = append(rev_response, response[i])
 	}
 
 	if len(response) > 0 {
