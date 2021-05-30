@@ -785,7 +785,7 @@ func moveImages(c echo.Context) error {
 		return err
 	}
 
-	for i, image := range images {
+	for _, image := range images {
 		dotPos := strings.LastIndexByte(image.Name, '.')
 		if dotPos < 0 {
 			return ErrBadReqeust
