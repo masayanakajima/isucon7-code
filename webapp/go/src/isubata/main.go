@@ -238,7 +238,7 @@ type ChannelInfo struct {
 type Image struct {
 	ID   int64  `db:"id"`
 	Name string `db:"name"`
-	Data []Byte `db:"data"`
+	Data []byte `db:"data"`
 }
 
 func getChannel(c echo.Context) error {
