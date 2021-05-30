@@ -1,6 +1,6 @@
 CREATE TABLE user (
-  id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
-  name VARCHAR(191) UNIQUE PRIMARY KEY,
+  id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+  name VARCHAR(191) UNIQUE,
   salt VARCHAR(20),
   password VARCHAR(40),
   display_name TEXT,
@@ -39,3 +39,5 @@ CREATE TABLE haveread (
   created_at DATETIME NOT NULL,
   PRIMARY KEY(user_id, channel_id)
 ) Engine=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE user ADD INDEX name_idx(name);
