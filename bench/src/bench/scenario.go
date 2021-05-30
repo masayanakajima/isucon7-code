@@ -2101,7 +2101,7 @@ func CheckMessageScenario(ctx context.Context, state *State) error {
 				if u.ChannelID == chanID {
 					// 並行で走らない前提
 					if u.Unread != 0 {
-						return fatalErrorf("新着件数が正しくありません A" + u.ChannelID + ":" + user1.Name)
+						return fatalErrorf("新着件数が正しくありません A")
 					}
 				}
 			}
