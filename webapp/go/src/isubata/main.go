@@ -707,7 +707,7 @@ func postProfile(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		io.Copy(fh, f)
+		io.Copy(f, avatarData)
 		defer f.Close()
 		_, err = db.Exec("UPDATE user SET avatar_icon = ? WHERE id = ?", avatarName, self.ID)
 		if err != nil {
@@ -727,7 +727,7 @@ func postProfile(c echo.Context) error {
 
 func getIcon(c echo.Context) error {
 	var name string
-	var data []byte
+	//var data []byte
 	//err := db.QueryRow("SELECT name, data FROM image WHERE name = ?",
 	//	c.Param("file_name")).Scan(&name, &data)
 	name = c.Param("file_name")
