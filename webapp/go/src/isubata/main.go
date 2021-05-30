@@ -780,7 +780,7 @@ func tRange(a, b int64) []int64 {
 
 func moveImages() {
 	images := []Image{}
-	err = db.Select(&image, "SELECT * FROM image")
+	err := db.Select(&images, "SELECT * FROM image")
 	if err != nil {
 		return err
 	}
