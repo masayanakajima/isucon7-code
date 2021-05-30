@@ -38,15 +38,3 @@ CREATE TABLE haveread (
   created_at DATETIME NOT NULL,
   PRIMARY KEY(user_id, channel_id)
 ) Engine=InnoDB DEFAULT CHARSET=utf8mb4;
-
-message id <- channel_id, (last_id) < id
-user name,display_name,avatar_icon <- user_id <- message user_id
-message created_at
-message content
-
-
-select m.id, u.name, u.display_name, u.avatar_icon, m.created_at, m.content
-from message as m
-join user as u
-on m.user_id = u.id
-where m.id > (last_id) and m.channel_id = (chanID);
