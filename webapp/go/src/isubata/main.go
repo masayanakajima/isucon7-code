@@ -401,13 +401,12 @@ func getMessage(c echo.Context) error {
 	//	response = append(response, r)
 	//}
 
-	rows, err := db.Query("select m.id, u.name, u.display_name, u.avatar_icon, m.created_at, m.content from (select id, user_id, created_at, content from message where channel_id = ? and id > ? order by id asc limit 100) as m join user as u on m.user_id = u.id", chanID, lastID)
+	rows, err := db.Query("select m.id, u.name, u.display_name, u.avatar_icon, m.created_at, m.content from (select id, user_id, created_at, content from message where channel_id = ? and id > ? order by id desc limit 100) as m join user as u on m.user_id = u.id", chanID, lastID)
 	if err != nil {
 		return err
 	}
 
 	response := make([]map[string]interface{}, 0)
-	var message_id int64
 	for rows.Next() {
 		u := User{}
 		var id int64
@@ -421,7 +420,6 @@ func getMessage(c echo.Context) error {
 		r["user"] = u
 		r["content"] = content
 		r["date"] = date.Format("2006/01/02 15:04:05")
-		message_id = id
 		response = append(response, r)
 	}
 
@@ -429,7 +427,7 @@ func getMessage(c echo.Context) error {
 		_, err := db.Exec("INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at)"+
 			" VALUES (?, ?, ?, NOW(), NOW())"+
 			" ON DUPLICATE KEY UPDATE message_id = ?, updated_at = NOW()",
-			userID, chanID, message_id, message_id)
+			userID, chanID, response[0]["id"], response[0]["id"])
 		if err != nil {
 			return err
 		}
