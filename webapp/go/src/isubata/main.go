@@ -438,10 +438,6 @@ func getMessage(c echo.Context) error {
 		}
 	}
 
-	log.Println("getMessage")
-	log.Println(userID)
-	log.Println(response)
-
 	return c.JSON(http.StatusOK, rev_response)
 }
 
@@ -497,10 +493,6 @@ func fetchUnread(c echo.Context) error {
 			"unread":     cnt}
 		resp = append(resp, r)
 	}
-
-	log.Println("fetchUnread")
-	log.Println(userID)
-	log.Println(resp)
 
 	return c.JSON(http.StatusOK, resp)
 }
@@ -558,7 +550,7 @@ func getHistory(c echo.Context) error {
 	//	mjson = append(mjson, r)
 	//}
 
-	rows, err := db.Query("select m.id, u.name, u.display_name, u.avatar_icon, m.created_at, m.content from (SELECT * FROM message WHERE channel_id = ? ORDER BY id DESC LIMIT ? OFFSET ?) as m join user as u on m.user_id = u.id", chID, N, (page-1)*N)
+	rows, err := db.Query("select m.id, u.name, u.display_name, u.avatar_icon, m.created_at, m.content from (SELECT id, user_id, created_at, content FROM message WHERE channel_id = ? ORDER BY id DESC LIMIT ? OFFSET ?) as m join user as u on m.user_id = u.id", chID, N, (page-1)*N)
 	if err != nil {
 		return err
 	}
@@ -580,6 +572,11 @@ func getHistory(c echo.Context) error {
 		mjson = append(mjson, r)
 	}
 
+	rev_mjson := make([]map[string]interface{}, 0)
+	for i := len(response) - 1; i >= 0; i-- {
+		rev_msjon = append(rev_mjson, msjon[i])
+	}
+
 	channels := []ChannelInfo{}
 	err = db.Select(&channels, "SELECT * FROM channel ORDER BY id")
 	if err != nil {
@@ -589,7 +586,7 @@ func getHistory(c echo.Context) error {
 	return c.Render(http.StatusOK, "history", map[string]interface{}{
 		"ChannelID": chID,
 		"Channels":  channels,
-		"Messages":  mjson,
+		"Messages":  rev_mjson,
 		"MaxPage":   maxPage,
 		"Page":      page,
 		"User":      user,
