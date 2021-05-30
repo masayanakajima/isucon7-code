@@ -573,8 +573,8 @@ func getHistory(c echo.Context) error {
 	}
 
 	rev_mjson := make([]map[string]interface{}, 0)
-	for i := len(msjon) - 1; i >= 0; i-- {
-		rev_mjson = append(rev_mjson, msjon[i])
+	for i := len(mjson) - 1; i >= 0; i-- {
+		rev_mjson = append(rev_mjson, mjson[i])
 	}
 
 	channels := []ChannelInfo{}
