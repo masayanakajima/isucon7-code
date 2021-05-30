@@ -778,7 +778,7 @@ func tRange(a, b int64) []int64 {
 	return r
 }
 
-func moveImages() {
+func moveImages(c echo.Context) error {
 	images := []Image{}
 	err := db.Select(&images, "SELECT * FROM image")
 	if err != nil {
