@@ -23,8 +23,6 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/middleware"
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/spiegel-im-spiegel/logf"
 )
 
 const (
@@ -35,8 +33,6 @@ var (
 	db            *sqlx.DB
 	ErrBadReqeust = echo.NewHTTPError(http.StatusBadRequest)
 )
-
-var logger *logf.Logger
 
 type Renderer struct {
 	templates *template.Template
@@ -438,10 +434,6 @@ func getMessage(c echo.Context) error {
 			return err
 		}
 	}
-	logger.Print("getMessage")
-	logger.Print(userID)
-	logger.Print(response)
-	logger.Print(message_id)
 
 	return c.JSON(http.StatusOK, response)
 }
@@ -498,10 +490,6 @@ func fetchUnread(c echo.Context) error {
 			"unread":     cnt}
 		resp = append(resp, r)
 	}
-
-	logger.Print("fetchUnread")
-	logger.Print(userID)
-	logger.Print(resp)
 
 	return c.JSON(http.StatusOK, resp)
 }
@@ -757,21 +745,9 @@ func main() {
 		templates: template.Must(template.New("").Funcs(funcs).ParseGlob("views/*.html")),
 	}
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secretonymoris"))))
-
-	rl, err := rotatelogs.New("logs/log.%Y%m%d%H%M.txt")
-	if err != nil {
-		logf.Fatal(err)
-		return
-	}
-
-	//logf.SetOutput(rl)
-	logger = logf.New(
-		logf.WithFlags(logf.LstdFlags|logf.Lshortfile),
-		//logf.WithPrefix("[Sample] "),
-		logf.WithWriter(rl),
-		logf.WithMinLevel(logf.INFO),
-	)
-
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "request:\"${method} ${uri}\" status:${status} latency:${latency} (${latency_human}) bytes:${bytes_out}\n",
+	}))
 	e.Use(middleware.Static("../public"))
 
 	e.GET("/initialize", getInitialize)
