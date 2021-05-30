@@ -577,7 +577,7 @@ func getHistory(c echo.Context) error {
 		r["user"] = u
 		r["content"] = content
 		r["date"] = date.Format("2006/01/02 15:04:05")
-		mjson = append(msjon, r)
+		mjson = append(mjson, r)
 	}
 
 	channels := []ChannelInfo{}
