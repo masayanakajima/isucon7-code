@@ -706,7 +706,11 @@ func postProfile(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		io.Copy(f, fh)
+		src, err := fh.Open()
+		if err != nil {
+			return err
+		}
+		io.Copy(f, src)
 		defer f.Close()
 		_, err = db.Exec("UPDATE user SET avatar_icon = ? WHERE id = ?", avatarName, self.ID)
 		if err != nil {
