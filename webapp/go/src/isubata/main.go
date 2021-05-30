@@ -423,6 +423,11 @@ func getMessage(c echo.Context) error {
 		response = append(response, r)
 	}
 
+	rev_response := make([]map[string]interface{}, 0)
+	for i := len(response) - 1; i >= 0; i-- {
+		rev_response = append(rev_response, reponse[i])
+	}
+
 	if len(response) > 0 {
 		_, err := db.Exec("INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at)"+
 			" VALUES (?, ?, ?, NOW(), NOW())"+
@@ -437,7 +442,7 @@ func getMessage(c echo.Context) error {
 	log.Println(userID)
 	log.Println(response)
 
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, rev_response)
 }
 
 func queryChannels() ([]int64, error) {
