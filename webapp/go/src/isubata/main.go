@@ -7,7 +7,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"html/template"
-	"image"
 	"io"
 	"io/ioutil"
 	"log"
@@ -707,7 +706,7 @@ func postProfile(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		io.Copy(f, avatarData)
+		io.Copy(f, c.FormFile("avatar_icon"))
 		defer f.Close()
 		_, err = db.Exec("UPDATE user SET avatar_icon = ? WHERE id = ?", avatarName, self.ID)
 		if err != nil {
@@ -740,7 +739,7 @@ func getIcon(c echo.Context) error {
 		return err
 	}
 
-	data, _, err := image.Decode(file)
+	data, _, err := ioutil.ReadAll(file)
 	if err != nil {
 		return err
 	}
