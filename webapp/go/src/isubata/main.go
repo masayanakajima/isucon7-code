@@ -668,8 +668,8 @@ func postProfile(c echo.Context) error {
 
 	avatarName := ""
 	var avatarData []byte
-
-	if fh, err := c.FormFile("avatar_icon"); err == http.ErrMissingFile {
+	fh, err := c.FormFile("avatar_icon")
+	if err == http.ErrMissingFile {
 		// no file upload
 	} else if err != nil {
 		return err
@@ -706,7 +706,7 @@ func postProfile(c echo.Context) error {
 		if err != nil {
 			return err
 		}
-		io.Copy(f, c.FormFile("avatar_icon"))
+		io.Copy(f, fh)
 		defer f.Close()
 		_, err = db.Exec("UPDATE user SET avatar_icon = ? WHERE id = ?", avatarName, self.ID)
 		if err != nil {
@@ -739,10 +739,7 @@ func getIcon(c echo.Context) error {
 		return err
 	}
 
-	data, _, err := ioutil.ReadAll(file)
-	if err != nil {
-		return err
-	}
+	data, _ := ioutil.ReadAll(file)
 
 	mime := ""
 	switch true {
