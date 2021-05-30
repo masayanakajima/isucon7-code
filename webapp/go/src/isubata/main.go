@@ -436,7 +436,6 @@ func getMessage(c echo.Context) error {
 	log.Println("getMessage")
 	log.Println(userID)
 	log.Println(response)
-	log.Println(message_id)
 
 	return c.JSON(http.StatusOK, response)
 }
