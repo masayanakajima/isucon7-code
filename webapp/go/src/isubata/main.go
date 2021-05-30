@@ -23,6 +23,8 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/middleware"
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"github.com/spiegel-im-spiegel/logf"
 )
 
 const (
@@ -33,6 +35,8 @@ var (
 	db            *sqlx.DB
 	ErrBadReqeust = echo.NewHTTPError(http.StatusBadRequest)
 )
+
+var logger *logf.Logger
 
 type Renderer struct {
 	templates *template.Template
@@ -128,8 +132,8 @@ func queryMessages(chanID, lastID int64) ([]Message, error) {
 	//if lastID == 0 {
 	//	err := db.SELECT(&msgs, "SELECT * FROM message where channel_id = ? ORDER BY id DESC LIMIT 100", chanID)
 	//} else {
-		err := db.Select(&msgs, "SELECT * FROM message WHERE id > ? AND channel_id = ? ORDER BY id DESC LIMIT 100",
-			lastID, chanID)
+	err := db.Select(&msgs, "SELECT * FROM message WHERE id > ? AND channel_id = ? ORDER BY id DESC LIMIT 100",
+		lastID, chanID)
 	//}
 	return msgs, err
 }
@@ -425,8 +429,6 @@ func getMessage(c echo.Context) error {
 		response = append(response, r)
 	}
 
-
-
 	if len(response) > 0 {
 		_, err := db.Exec("INSERT INTO haveread (user_id, channel_id, message_id, updated_at, created_at)"+
 			" VALUES (?, ?, ?, NOW(), NOW())"+
@@ -436,6 +438,10 @@ func getMessage(c echo.Context) error {
 			return err
 		}
 	}
+	logger.Print("getMessage")
+	logger.Print(userID)
+	logger.Print(response)
+	logger.Print(message_id)
 
 	return c.JSON(http.StatusOK, response)
 }
@@ -492,6 +498,10 @@ func fetchUnread(c echo.Context) error {
 			"unread":     cnt}
 		resp = append(resp, r)
 	}
+
+	logger.Print("fetchUnread")
+	logger.Print(userID)
+	logger.Print(resp)
 
 	return c.JSON(http.StatusOK, resp)
 }
@@ -747,9 +757,21 @@ func main() {
 		templates: template.Must(template.New("").Funcs(funcs).ParseGlob("views/*.html")),
 	}
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secretonymoris"))))
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "request:\"${method} ${uri}\" status:${status} latency:${latency} (${latency_human}) bytes:${bytes_out}\n",
-	}))
+
+	rl, err := rotatelogs.New("logs/log.%Y%m%d%H%M.txt")
+	if err != nil {
+		logf.Fatal(err)
+		return
+	}
+
+	//logf.SetOutput(rl)
+	logger = logf.New(
+		logf.WithFlags(logf.LstdFlags|logf.Lshortfile),
+		//logf.WithPrefix("[Sample] "),
+		logf.WithWriter(rl),
+		logf.WithMinLevel(logf.INFO),
+	)
+
 	e.Use(middleware.Static("../public"))
 
 	e.GET("/initialize", getInitialize)
