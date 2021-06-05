@@ -213,7 +213,7 @@ func getInitialize(c echo.Context) error {
 	db.MustExec("DELETE FROM channel WHERE id > 10")
 	db.MustExec("DELETE FROM message WHERE id > 10000")
 	db.MustExec("DELETE FROM haveread")
-	return c.String(204, "")
+	return moveImages(c)
 }
 
 func getIndex(c echo.Context) error {
@@ -474,7 +474,7 @@ func fetchUnread(c echo.Context) error {
 		return c.NoContent(http.StatusForbidden)
 	}
 
-	//time.Sleep(time.Second)
+	time.Sleep(3 * time.Second)
 
 	resp := []map[string]interface{}{}
 	rows, err := db.Query("select channel_id, count(*) from (select msg.id as id, msg.channel_id as channel_id, ifnull(tmp1.message_id,0) as last_id from message as msg left outer join (select channel_id, message_id from haveread as hr where user_id = ?) as tmp1 on msg.channel_id = tmp1.channel_id) as tmp3 where id > last_id group by channel_id", userID)
@@ -821,7 +821,7 @@ func moveImages(c echo.Context) error {
 		f.Write(image.Data)
 		defer f.Close()
 	}
-	return c.Redirect(http.StatusSeeOther, "/")
+	return c.String(204, "")
 }
 
 func main() {
@@ -859,7 +859,6 @@ func main() {
 	e.GET("add_channel", getAddChannel)
 	e.POST("add_channel", postAddChannel)
 	e.GET("/icons/:file_name", getIcon)
-	e.GET("/move_images", moveImages)
 
 	e.Start(":5000")
 }
